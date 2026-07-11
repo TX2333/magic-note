@@ -1,10 +1,12 @@
 workflows:
-  flutter-android:
-    name: Flutter Android 构建
+  flutter-android-apk:
+    name: Flutter Android APK 构建
     max_build_duration: 30
     instance_type: linux_x2
     environment:
       flutter: 3.24.0
+      vars:
+        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true"
     triggering:
       events:
         - push
@@ -14,18 +16,21 @@ workflows:
           include: true
           source: true
     scripts:
+      - name: 配置 Gradle 镜像源
+        script: |
+          echo "org.gradle.jvmargs=-Xmx4g" >> android/gradle.properties
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          
       - name: 获取 Flutter 依赖
         script: |
           flutter pub get
           
-      - name: 构建 APK 和 App Bundle
+      - name: 构建 Release APK
         script: |
-          flutter build apk --release
-          flutter build appbundle --release
+          flutter build apk --release --verbose
           
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
-      - build/app/outputs/bundle/release/app-release.aab
       
     publishing:
       email:
