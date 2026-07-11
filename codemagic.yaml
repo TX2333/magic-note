@@ -2,22 +2,11 @@ workflows:
   android:
     name: Flutter Android APK
     max_build_duration: 30
-    environment:
-      flutter: 3.16.9
+    instance_type: mac_mini
     scripts:
-      - name: 清理并获取依赖
-        script: |
-          flutter clean
-          flutter pub get
-          
       - name: 构建 Release APK
         script: |
-          flutter build apk --release --no-tree-shake-icons
+          flutter build apk --release
           
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
-      
-    publishing:
-      email:
-        recipients:
-          - your-email@example.com
