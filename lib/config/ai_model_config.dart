@@ -1,7 +1,4 @@
-
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// AI 模型配置
 class AIModel {
@@ -50,34 +47,6 @@ class AIModel {
       temperature: temperature ?? this.temperature,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'provider': provider,
-      'apiKey': apiKey,
-      'apiBase': apiBase,
-      'modelName': modelName,
-      'isEnabled': isEnabled,
-      'maxTokens': maxTokens,
-      'temperature': temperature,
-    };
-  }
-
-  factory AIModel.fromJson(Map<String, dynamic> json) {
-    return AIModel(
-      id: json['id'],
-      name: json['name'],
-      provider: json['provider'],
-      apiKey: json['apiKey'],
-      apiBase: json['apiBase'],
-      modelName: json['modelName'],
-      isEnabled: json['isEnabled'] ?? true,
-      maxTokens: json['maxTokens'],
-      temperature: json['temperature'],
-    );
-  }
 }
 
 /// AI 模型配置管理器（单例）
@@ -96,28 +65,11 @@ class AIModelConfig extends ChangeNotifier {
   String get currentModelId => _currentModelId;
 
   /// 初始化预设模型
-  Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('ai_models');
-    final currentId = prefs.getString('current_model_id');
-
-    if (saved != null && saved.isNotEmpty) {
-      try {
-        final List<dynamic> list = jsonDecode(saved);
-        _models = list.map((item) => AIModel.fromJson(item)).toList();
-      } catch (e) {
-        _models = _getDefaultModels();
-      }
-    } else {
-      _models = _getDefaultModels();
-    }
-
-    if (currentId != null && currentId.isNotEmpty) {
-      _currentModelId = currentId;
-    } else if (_models.isNotEmpty) {
+  void init() {
+    _models = _getDefaultModels();
+    if (_models.isNotEmpty) {
       _currentModelId = _models.first.id;
     }
-
     notifyListeners();
   }
 
@@ -157,55 +109,43 @@ class AIModelConfig extends ChangeNotifier {
     ];
   }
 
-  /// 保存配置
-  Future<void> _save() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = _models.map((m) => m.toJson()).toList();
-    await prefs.setString('ai_models', jsonEncode(list));
-    await prefs.setString('current_model_id', _currentModelId);
-  }
-
   /// 添加自定义模型
-  Future<void> addModel(AIModel model) async {
+  void addModel(AIModel model) {
     _models.add(model);
-    await _save();
     notifyListeners();
   }
 
   /// 更新模型
-  Future<void> updateModel(AIModel model) async {
+  void updateModel(AIModel model) {
     final index = _models.indexWhere((m) => m.id == model.id);
     if (index != -1) {
       _models[index] = model;
-      await _save();
       notifyListeners();
     }
   }
 
   /// 删除模型
-  Future<void> deleteModel(String id) async {
+  void deleteModel(String id) {
     _models.removeWhere((m) => m.id == id);
     if (_currentModelId == id && _models.isNotEmpty) {
       _currentModelId = _models.first.id;
     }
-    await _save();
     notifyListeners();
   }
 
   /// 切换当前模型
-  Future<void> setCurrentModel(String id) async {
+  void setCurrentModel(String id) {
     _currentModelId = id;
-    await _save();
     notifyListeners();
   }
 
   /// 快速添加 OpenAI 兼容模型
-  Future<void> addOpenAICompatibleModel({
+  void addOpenAICompatibleModel({
     required String name,
     required String apiKey,
     required String apiBase,
     required String modelName,
-  }) async {
+  }) {
     final model = AIModel(
       id: 'custom-${DateTime.now().millisecondsSinceEpoch}',
       name: name,
@@ -214,7 +154,7 @@ class AIModelConfig extends ChangeNotifier {
       apiBase: apiBase,
       modelName: modelName,
     );
-    await addModel(model);
+    addModel(model);
   }
 
   /// 预设常用模型（方便快速添加）

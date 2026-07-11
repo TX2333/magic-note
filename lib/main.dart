@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/magic_handwriting_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/ai_model_config_screen.dart';
@@ -46,36 +45,16 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   List<Note> _notes = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadNotes();
-  }
-
-  Future<void> _loadNotes() async {
-    final prefs = await SharedPreferences.getInstance();
-    final notesJson = prefs.getStringList('notes') ?? [];
-    setState(() {
-      _notes = notesJson.map((json) => Note.fromJsonString(json)).toList();
-    });
-  }
-
-  Future<void> _saveNote(Note note) async {
-    final prefs = await SharedPreferences.getInstance();
+  void _saveNote(Note note) {
     setState(() {
       _notes.insert(0, note);
     });
-    final notesJson = _notes.map((n) => n.toJsonString()).toList();
-    await prefs.setStringList('notes', notesJson);
   }
 
-  Future<void> _deleteNote(int index) async {
-    final prefs = await SharedPreferences.getInstance();
+  void _deleteNote(int index) {
     setState(() {
       _notes.removeAt(index);
     });
-    final notesJson = _notes.map((n) => n.toJsonString()).toList();
-    await prefs.setStringList('notes', notesJson);
   }
 
   @override
