@@ -64,7 +64,7 @@ class AIModelConfig extends ChangeNotifier {
   String get currentModelId => _currentModelId;
 
   /// 初始化预设模型
-  void init() {
+  Future<void> init() async {
     _models = _getDefaultModels();
     if (_models.isNotEmpty) {
       _currentModelId = _models.first.id;
@@ -109,13 +109,13 @@ class AIModelConfig extends ChangeNotifier {
   }
 
   /// 添加自定义模型
-  void addModel(AIModel model) {
+  Future<void> addModel(AIModel model) async {
     _models.add(model);
     notifyListeners();
   }
 
   /// 更新模型
-  void updateModel(AIModel model) {
+  Future<void> updateModel(AIModel model) async {
     final index = _models.indexWhere((m) => m.id == model.id);
     if (index != -1) {
       _models[index] = model;
@@ -124,7 +124,7 @@ class AIModelConfig extends ChangeNotifier {
   }
 
   /// 删除模型
-  void deleteModel(String id) {
+  Future<void> deleteModel(String id) async {
     _models.removeWhere((m) => m.id == id);
     if (_currentModelId == id && _models.isNotEmpty) {
       _currentModelId = _models.first.id;
@@ -133,18 +133,18 @@ class AIModelConfig extends ChangeNotifier {
   }
 
   /// 切换当前模型
-  void setCurrentModel(String id) {
+  Future<void> setCurrentModel(String id) async {
     _currentModelId = id;
     notifyListeners();
   }
 
   /// 快速添加 OpenAI 兼容模型
-  void addOpenAICompatibleModel({
+  Future<void> addOpenAICompatibleModel({
     required String name,
     required String apiKey,
     required String apiBase,
     required String modelName,
-  }) {
+  }) async {
     final model = AIModel(
       id: 'custom-${DateTime.now().millisecondsSinceEpoch}',
       name: name,
@@ -153,7 +153,7 @@ class AIModelConfig extends ChangeNotifier {
       apiBase: apiBase,
       modelName: modelName,
     );
-    addModel(model);
+    await addModel(model);
   }
 
   /// 预设常用模型（方便快速添加）
