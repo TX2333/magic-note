@@ -349,7 +349,7 @@ class _MagicHandwritingScreenState extends State<MagicHandwritingScreen> with Ti
       
       // 3. 等待笔迹消散完成（3秒），同时等待AI返回
       await Future.wait([
-        _fadeController.done,
+        _fadeController.forward(),
         Future.delayed(const Duration(seconds: 3)),
       ]);
       
@@ -938,51 +938,6 @@ class _MagicHandwritingScreenState extends State<MagicHandwritingScreen> with Ti
       },
     );
   }
-}
-
-// 闪烁光标组件
-class _BlinkingCursor extends StatefulWidget {
-  const _BlinkingCursor();
-
-  @override
-  State<_BlinkingCursor> createState() => _BlinkingCursorState();
-}
-
-class _BlinkingCursorState extends State<_BlinkingCursor> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _controller.value,
-          child: Container(
-            width: 8,
-            height: 18,
-            color: const Color(0xFF39FF14),
-          ),
-        );
-      },
-    );
-  }
-}
 
   Widget _buildBottomControls() {
     return Padding(
@@ -1247,4 +1202,47 @@ class FadingStrokesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant FadingStrokesPainter oldDelegate) => true;
+}
+
+class _BlinkingCursor extends StatefulWidget {
+  const _BlinkingCursor();
+
+  @override
+  State<_BlinkingCursor> createState() => _BlinkingCursorState();
+}
+
+class _BlinkingCursorState extends State<_BlinkingCursor> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _controller.value,
+          child: Container(
+            width: 8,
+            height: 20,
+            color: const Color(0xFF39FF14),
+          ),
+        );
+      },
+    );
+  }
 }
