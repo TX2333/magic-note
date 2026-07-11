@@ -24,11 +24,14 @@ jobs:
       - name: 📦 安装依赖
         run: flutter pub get
       
-      - name: 🔨 构建 Release APK（完整输出）
-        run: flutter build apk --release --verbose
+      - name: 🔨 【直接用 Gradle 构建！绕过 Flutter 工具 Bug！】
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace 2>&1 | tail -100
       
-      - name: 🔍 调试：列出构建输出目录
-        run: ls -laR build/app/outputs/  # 递归列出所有子目录
+      - name: 🔍 调试：列出整个 build 目录（找 APK！）
+        run: ls -laR build/
       
       - name: 🔍 调试：搜索所有 APK 文件
         run: find build -name "*.apk" -type f
@@ -40,7 +43,7 @@ jobs:
           path: |
             build/app/outputs/apk/release/app-release.apk
             build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/**/app-release.apk
+            build/app/outputs/apk/*release*.apk
             build/**/*.apk
           if-no-files-found: error
           retention-days: 30
