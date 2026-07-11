@@ -1,6 +1,6 @@
 workflows:
-  flutter-android-apk:
-    name: Flutter Android APK 构建
+  android:
+    name: Flutter Android APK
     max_build_duration: 30
     instance_type: linux_x2
     environment:
