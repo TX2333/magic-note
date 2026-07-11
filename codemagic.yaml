@@ -1,6 +1,7 @@
 workflows:
   android:
     name: Android Release Build
+    instance_type: linux
     environment:
       flutter: 3.13.7
     scripts:
