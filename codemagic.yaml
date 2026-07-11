@@ -19,21 +19,30 @@ workflows:
         script: |
           flutter clean
           flutter pub get
-      - name: 构建 Release APK（显示完整输出）
+      - name: 🔧 让 Flutter 准备所有文件（不构建，只准备）
         script: |
-          flutter build apk --release --verbose
-      - name: 🔍 查找所有 APK 文件位置
+          # 只让 Flutter 准备 Gradle wrapper 和配置文件
+          flutter build apk --debug 2>&1 | head -50 || true
+      - name: 🚀 直接用 Gradle 构建 Release APK（完全绕过 Flutter 工具！）
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace 2>&1 | tail -50
+      - name: 🔍 查找所有 APK 文件
         script: |
           echo "=== 查找 APK ==="
           find . -name "*.apk" -type f
           echo ""
           echo "=== build 目录结构 ==="
-          ls -laR build/app/outputs/ 2>/dev/null || true
+          ls -la build/app/outputs/ 2>/dev/null || true
+          ls -la android/app/build/outputs/ 2>/dev/null || true
     artifacts:
       - build/app/outputs/apk/release/app-release.apk
       - build/app/outputs/flutter-apk/app-release.apk
+      - android/app/build/outputs/apk/release/app-release.apk
       - build/**/*.apk
       - android/app/build/**/*.apk
+      - ./**/*.apk
     publishing:
       email:
         recipients:
