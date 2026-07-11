@@ -1,0 +1,36 @@
+workflows:
+  flutter-android:
+    name: Flutter Android 构建
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      flutter: 3.24.0
+    triggering:
+      events:
+        - push
+        - tag
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+    scripts:
+      - name: 获取 Flutter 依赖
+        script: |
+          flutter pub get
+          
+      - name: 构建 APK 和 App Bundle
+        script: |
+          flutter build apk --release
+          flutter build appbundle --release
+          
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+      
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true

@@ -1,0 +1,46 @@
+
+name: 📦 构建 APK（Gitee Go）
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  gitee:
+    trigger: manual  # 允许手动触发
+
+jobs:
+  build:
+    name: 🔨 构建魔法笔记 APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v3
+      
+      - name: 🐦 设置 Flutter 环境
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+          cache: true
+      
+      - name: 📦 安装依赖
+        run: flutter pub get
+      
+      - name: 🔨 构建 Release APK
+        run: flutter build apk --release
+      
+      - name: 📤 上传 APK 构建产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: 魔法笔记-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+      
+      - name: ✅ 构建完成
+        run: |
+          echo "================================="
+          echo "🎉 APK 构建成功！"
+          echo "📦 下载 APK：点击上方的 'Artifacts'"
+          echo "================================="

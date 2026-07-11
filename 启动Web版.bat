@@ -1,0 +1,49 @@
+@echo off
+chcp 65001 >nul
+title ✨ 魔法笔记 - Web版
+color 0D
+
+echo.
+echo ╔═════════════════════════════════════════════════╗
+echo ║                                                   ║
+echo ║              ✨ 魔法笔记 - Web版 ✨                ║
+echo ║                                                   ║
+echo ╚═════════════════════════════════════════════════╝
+echo.
+
+REM 检查Python
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ❌ Python未安装！
+    pause
+    exit /b 1
+)
+echo ✅ Python已安装
+
+REM 安装依赖
+echo.
+echo 📦 检查依赖...
+python -c "import flask" 2>&1 | findstr "error" >nul
+if %errorlevel% equ 0 (
+    echo 🔧 正在安装 Flask...
+    pip install flask requests
+) else (
+    echo ✅ 依赖已安装
+)
+
+echo.
+echo 🚀 启动魔法笔记服务...
+echo.
+echo ═══════════════════════════════════════════════
+echo 🌐 浏览器访问: http://localhost:5000
+echo 📱 手机请访问上方显示的局域网地址
+echo ═══════════════════════════════════════════════
+echo.
+echo 💡 提示: 手机和电脑需要连接同一个WiFi
+echo.
+echo 按 Ctrl+C 停止服务
+echo.
+
+python magic_note_web.py
+
+pause
