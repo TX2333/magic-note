@@ -24,31 +24,30 @@ jobs:
       - name: 📦 安装依赖
         run: flutter pub get
       
-      - name: 🔍 调试：列出 android 目录内容
+      - name: 🔍 调试：构建前列出 android 目录内容
         run: ls -la android/
       
-      - name: 🔨 【直接用 Gradle 构建！绕过 Flutter 工具 Bug！】
+      - name: 🔧 【关键！】让 Flutter 生成缺失的 Gradle wrapper 文件！
+        run: flutter create --platforms android . 2>&1 | tail -30
+      
+      - name: 🔍 调试：构建后列出 android 目录内容
+        run: ls -la android/
+      
+      - name: 🔨 直接用 Gradle 构建 APK
         run: |
           chmod +x android/gradlew
           ./android/gradlew -p android assembleRelease --stacktrace 2>&1 | tail -100
       
-      - name: 🔍 调试：列出整个 build 目录（找 APK！）
-        run: ls -laR build/ 2>&1 | head -200
+      - name: 🔍 调试：列出整个构建目录（找 APK！）
+        run: find . -name "*.apk" -type f 2>/dev/null
       
-      - name: 🔍 调试：搜索所有 APK 文件
-        run: find build -name "*.apk" -type f
-      
-      - name: 📤 上传 APK（所有可能的路径）
+      - name: 📤 上传 APK
         uses: actions/upload-artifact@v4
         with:
           name: 魔法笔记-APK
           path: |
-            build/app/outputs/apk/release/app-release.apk
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/apk/*release*.apk
-            build/**/*.apk
-            android/build/**/*.apk
-            android/app/build/**/*.apk
+            **/app-release.apk
+            **/*release*.apk
           if-no-files-found: error
           retention-days: 30
       
