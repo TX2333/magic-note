@@ -19,13 +19,21 @@ workflows:
         script: |
           flutter clean
           flutter pub get
-      - name: 构建 Release APK
+      - name: 构建 Release APK（显示完整输出）
         script: |
-          flutter build apk --release
+          flutter build apk --release --verbose
+      - name: 🔍 查找所有 APK 文件位置
+        script: |
+          echo "=== 查找 APK ==="
+          find . -name "*.apk" -type f
+          echo ""
+          echo "=== build 目录结构 ==="
+          ls -laR build/app/outputs/ 2>/dev/null || true
     artifacts:
       - build/app/outputs/apk/release/app-release.apk
       - build/app/outputs/flutter-apk/app-release.apk
       - build/**/*.apk
+      - android/app/build/**/*.apk
     publishing:
       email:
         recipients:
