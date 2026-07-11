@@ -50,7 +50,8 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            // 不要签名！构建未签名的 APK，这样就不会有 debug.keystore 找不到的问题
+            signingConfig null
         }
     }
 }
