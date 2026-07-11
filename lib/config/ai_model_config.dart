@@ -60,8 +60,7 @@ class AIModelConfig extends ChangeNotifier {
 
   List<AIModel> get models => _models.where((m) => m.isEnabled).toList();
   List<AIModel> get allModels => _models;
-  AIModel? get currentModel =>
-      _models.firstWhere((m) => m.id == _currentModelId, orElse: () => _models.first);
+  AIModel? get currentModel => _models.firstWhere((m) => m.id == _currentModelId, orElse: () => _models.first);
   String get currentModelId => _currentModelId;
 
   /// 初始化预设模型
