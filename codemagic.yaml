@@ -1,8 +1,6 @@
 workflows:
   android:
     name: Android Release Build
-    environment:
-      flutter: 3.13.7
     scripts:
       - name: 获取依赖
         script: flutter pub get
