@@ -28,18 +28,22 @@ jobs:
         run: flutter build apk --release --verbose
       
       - name: 🔍 调试：列出构建输出目录
-        run: ls -la build/app/outputs/
+        run: ls -laR build/app/outputs/  # 递归列出所有子目录
       
-      - name: 🔍 调试：列出所有 APK 候选路径
-        run: find build -name "*.apk"
+      - name: 🔍 调试：搜索所有 APK 文件
+        run: find build -name "*.apk" -type f
       
-      - name: 📤 上传 APK 到构建结果
+      - name: 📤 上传 APK（所有可能的路径）
         uses: actions/upload-artifact@v4
         with:
           name: 魔法笔记-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error  # 找不到文件就报错
-          retention-days: 30  # 保留30天
+          path: |
+            build/app/outputs/apk/release/app-release.apk
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/**/app-release.apk
+            build/**/*.apk
+          if-no-files-found: error
+          retention-days: 30
       
       - name: ✅ 完成
         run: echo "🎉 APK 构建完成！"
