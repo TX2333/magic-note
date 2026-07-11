@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
+import 'dart:io';
 import '../models/riddle.dart';
 import '../data/riddle_data.dart';
 
@@ -24,35 +25,49 @@ class RiddleProvider with ChangeNotifier {
     // 加载内置谜语数据
     _riddles = RiddleData.getAllRiddles();
 
-    // 从本地存储加载收藏
+    // 从本地文件加载收藏
     await _loadFavorites();
 
     _isLoading = false;
     notifyListeners();
   }
 
+  Future<File> _getFavoritesFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/favorites.json');
+  }
+
   Future<void> _loadFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    final favoritesJson = prefs.getString('favorites');
-    if (favoritesJson != null) {
-      final List<dynamic> decoded = json.decode(favoritesJson);
-      final favoriteIds = decoded.cast<String>();
-      
-      // 标记收藏的谜语
-      for (var riddle in _riddles) {
-        if (favoriteIds.contains(riddle.id)) {
-          riddle.isFavorite = true;
+    try {
+      final file = await _getFavoritesFile();
+      if (await file.exists()) {
+        final contents = await file.readAsString();
+        final List<dynamic> decoded = json.decode(contents);
+        final favoriteIds = decoded.cast<String>();
+        
+        // 标记收藏的谜语
+        for (var riddle in _riddles) {
+          if (favoriteIds.contains(riddle.id)) {
+            riddle.isFavorite = true;
+          }
         }
+        
+        _favorites = _riddles.where((r) => r.isFavorite).toList();
       }
-      
-      _favorites = _riddles.where((r) => r.isFavorite).toList();
+    } catch (e) {
+      // 忽略错误，使用空收藏列表
+      _favorites = [];
     }
   }
 
   Future<void> _saveFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    final favoriteIds = _favorites.map((r) => r.id).toList();
-    await prefs.setString('favorites', json.encode(favoriteIds));
+    try {
+      final file = await _getFavoritesFile();
+      final favoriteIds = _favorites.map((r) => r.id).toList();
+      await file.writeAsString(json.encode(favoriteIds));
+    } catch (e) {
+      // 忽略保存错误
+    }
   }
 
   void toggleFavorite(Riddle riddle) {
