@@ -3,7 +3,7 @@ name: 🔨 构建 APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build-apk:
@@ -22,34 +22,37 @@ jobs:
           cache: true
       
       - name: 📦 安装依赖
-        run: flutter pub get
-      
-      - name: 🔍 调试：构建前列出 android 目录内容
-        run: ls -la android/
-      
-      - name: 🔧 【关键！】让 Flutter 生成缺失的 Gradle wrapper 文件！
-        run: flutter create --platforms android . 2>&1 | tail -30
-      
-      - name: 🔍 调试：构建后列出 android 目录内容
-        run: ls -la android/
-      
-      - name: 🔨 直接用 Gradle 构建 APK
         run: |
-          chmod +x android/gradlew
-          ./android/gradlew -p android assembleRelease --stacktrace 2>&1 | tail -100
+          flutter clean
+          flutter pub get
       
-      - name: 🔍 调试：列出整个构建目录（找 APK！）
-        run: find . -name "*.apk" -type f 2>/dev/null
+      - name: 🔧 让 Flutter 准备所有文件（不构建，只准备）
+        run: |
+          # 只让 Flutter 准备 Gradle wrapper 和配置文件
+          flutter build apk --debug 2>&1 | head -50 || true
       
-      - name: 📤 上传 APK
+      - name: 🚀 直接用 Gradle 构建 Release APK（完全绕过 Flutter 工具！）
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace 2>&1 | tail -50
+      
+      - name: 🔍 查找所有 APK 文件
+        run: |
+          echo "=== 查找 APK ==="
+          find . -name "*.apk" -type f
+          echo ""
+          echo "=== build 目录结构 ==="
+          ls -la build/app/outputs/ 2>/dev/null || true
+          ls -la android/app/build/outputs/ 2>/dev/null || true
+      
+      - name: 📤 上传 APK 到构建结果
         uses: actions/upload-artifact@v4
         with:
           name: 魔法笔记-APK
           path: |
-            **/app-release.apk
-            **/*release*.apk
-          if-no-files-found: error
+            build/app/outputs/apk/release/app-release.apk
+            build/app/outputs/flutter-apk/app-release.apk
+            android/app/build/outputs/apk/release/app-release.apk
+            **/*.apk
           retention-days: 30
-      
-      - name: ✅ 完成
-        run: echo "🎉 APK 构建完成！"
